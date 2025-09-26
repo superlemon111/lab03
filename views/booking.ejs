@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+    </head>
+
+    <body>
+        <%=booking.email%>,  <%= booking.numTickets %>
+            <form method ="POST" action ='/booking/delete/<%= booking._id %>'>
+                <button type="submit">delete</button>
+                
+            </form>
+    </body>
+</html>
