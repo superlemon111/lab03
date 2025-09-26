@@ -119,4 +119,25 @@ router.post('/booking/update/:id', async function (req, res) {
   }
 });
 
+// Search Bookings
+router.get('/booking/search', async function (req, res) {
+  const db = await connectToDB();
+  try {
+    let query = {};
+    if (req.query.email) {
+      query.email = req.query.email;
+    }
+    if (req.query.numTickets) {
+      query.numTickets = parseInt(req.query.numTickets);
+    }
+
+    let result = await db.collection("bookings").find(query).toArray();
+    res.render('bookings', { bookings: result });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  } finally {
+    await db.client.close();
+  }
+});
+
 module.exports = router;
