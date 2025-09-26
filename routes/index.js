@@ -125,7 +125,7 @@ router.get('/booking/search', async function (req, res) {
   try {
     let query = {};
     if (req.query.email) {
-      query.email = req.query.email;
+      query.email = { $regex: req.query.email };
     }
     if (req.query.numTickets) {
       query.numTickets = parseInt(req.query.numTickets);
