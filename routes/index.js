@@ -140,4 +140,54 @@ router.get('/booking/search', async function (req, res) {
   }
 });
 
+// Pagination based on query parameters page and limit, also returns total number of documents
+router.get('/booking/paginate', async function (req, res) {
+  const db = await connectToDB();
+  try {
+    // Parse and validate pagination parameters
+    let page = parseInt(req.query.page) || 1;
+    let perPage = parseInt(req.query.perPage) || 10;
+    
+    // Validate page number (must be positive)
+    if (page < 1) page = 1;
+    
+    // Validate perPage (must be between 1 and 100)
+    if (perPage < 1) perPage = 10;
+    if (perPage > 100) perPage = 100;
+    
+    let skip = (page - 1) * perPage;
+
+    // Get total count first to validate page number
+    let total = await db.collection("bookings").countDocuments();
+    let totalPages = Math.ceil(total / perPage);
+    
+    // If page exceeds total pages, redirect to last page
+    if (page > totalPages && totalPages > 0) {
+      return res.redirect(`/booking/paginate?page=${totalPages}&perPage=${perPage}`);
+    }
+
+    // Fetch paginated results with sorting (newest first)
+    let result = await db.collection("bookings")
+      .find()
+      .sort({ created_at: -1 })
+      .skip(skip)
+      .limit(perPage)
+      .toArray();
+
+    res.render('paginate', { 
+      bookings: result, 
+      total: total, 
+      page: page, 
+      perPage: perPage,
+      totalPages: totalPages
+    });
+  } catch (err) {
+    console.error('Pagination error:', err);
+    res.status(400).json({ message: err.message });
+  }
+  finally {
+    await db.client.close();
+  }
+});
+
 module.exports = router;
