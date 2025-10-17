@@ -7,6 +7,28 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+/* Display paginate view (server-side initial render + client-side AJAX) */
+
+// Pagination based on query parameters page and limit, also returns total number of documents
+router.get('/booking/paginate', async function (req, res) {
+  const db = await connectToDB();
+  try {
+    let page = parseInt(req.query.page) || 1;
+    let perPage = parseInt(req.query.perPage) || 10;
+    let skip = (page - 1) * perPage;
+
+    let result = await db.collection("bookings").find().skip(skip).limit(perPage).toArray();
+    let total = await db.collection("bookings").countDocuments();
+
+    res.render('paginate', { bookings: result, total: total, page: page, perPage: perPage });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+  finally {
+    await db.client.close();
+  }
+});
+
 /* Handle the Form */
 router.post('/booking', async function (req, res) {
   const db = await connectToDB();
