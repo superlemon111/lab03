@@ -92,11 +92,13 @@
             <div class="row">
                 <div class="col-sm-2"></div>
                 <div class="col-sm-10">
-                    <button type="submit" class="btn btn-primary" >Buy Tickets</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                    <button type="button" class="btn btn-danger" onclick="handleDelete()">Delete</button>
                 </div>
             </div>
         </form>
     </div>
+   
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
@@ -183,6 +185,49 @@ async function handleSubmit(event) {
     alert(JSON.stringify(updatedBooking));
 }
 
+// A function to update a booking with www-form-urlencoded data
+async function updateBooking(id, booking) {
+    
+    const response = await fetch(`/api/bookings/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams(booking)
+    });
+    // convert the response to json
+    const json = await response.json();
+    // return the json
+    return json;
+}
+
+// A function to delete a booking
+async function deleteBooking(id) {
+    // fetch the booking
+    const response = await fetch(`/api/bookings/${id}`, {
+        method: 'DELETE'
+    });
+    // convert the response to json
+    const json = await response.json();
+    // return the json
+    return json;
+}
+
+// A function to display a confirm box for delete, display the response and redirect to the bookings page
+async function handleDelete() {
+    // get the id from the url
+    const urlParams = new URLSearchParams(window.location.search);
+    let id = urlParams.get("id")
+    // display a confirm box
+    if (confirm(`Are you sure you want to delete booking ${id}?`)) {
+        // delete the booking
+        const deletedBooking = await deleteBooking(id);
+        // display the response
+        alert(JSON.stringify(deletedBooking));
+        // redirect to the bookings page
+        window.location.href = "/paginate.html";
+    }
+}
 render()
     </script>
 </body>
